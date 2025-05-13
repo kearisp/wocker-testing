@@ -1,6 +1,6 @@
 {
     "name": "@wocker/testing",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "author": "Kris Papercut <krispcut@gmail.com>",
     "description": "Docker workspace for web projects (testing)",
     "license": "MIT",
@@ -29,15 +29,17 @@
         "make-coverage-badge": "make-coverage-badge"
     },
     "peerDependencies": {
-        "@wocker/core": "^1.0.21"
+        "@wocker/core": "^1.0.23"
     },
     "devDependencies": {
         "@types/jest": "^29.5.14",
-        "@wocker/core": "^1.0.21",
+        "@wocker/core": "^1.0.23",
         "jest": "^29.7.0",
         "make-coverage-badge": "^1.2.0",
+        "memfs": "^4.17.2",
         "ts-jest": "^29.3.2",
         "ts-node": "^10.9.2",
-        "typescript": "^5.8.3"
+        "typescript": "^5.8.3",
+        "unionfs": "^4.5.4"
     }
 }
