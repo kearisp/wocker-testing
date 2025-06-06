@@ -5,6 +5,8 @@
 .DS_Store
 
 # Source code
+/bin
+/fixtures
 /src
 /test
 *.spec.js

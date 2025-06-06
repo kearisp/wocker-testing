@@ -34,9 +34,8 @@ const config: Config.InitialOptionsWithRootDir = {
 
     // An array of regexp pattern strings used to skip coverage collection
     coveragePathIgnorePatterns: [
-        // "/node_modules/",
         "src/index.ts",
-        "src/types/index.ts"
+        "src/modem/index.ts"
     ],
 
     // Indicates which provider should be used to instrument code for coverage
@@ -127,17 +126,18 @@ const config: Config.InitialOptionsWithRootDir = {
 
     // A list of paths to directories that Jest should use to search for files in
     roots: [
-        "<rootDir>/src"
+        "<rootDir>/src",
+        "<rootDir>/test"
     ],
 
     // The paths to modules that run some code to configure or set up the testing environment before each test
     setupFiles: [
-        // "<rootDir>/test/index.ts"
+        "<rootDir>/test/setup.ts"
     ],
     // A list of paths to modules that run some code to configure or set up the testing framework before each test
-    // setupFilesAfterEnv: [
-    //     "<rootDir>/test/index.ts"
-    // ],
+    setupFilesAfterEnv: [
+        "<rootDir>/test/setup-env.ts"
+    ],
     transform: {
         "^.+\\.(t|j)s$": "ts-jest"
     },
