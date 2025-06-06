@@ -3,15 +3,19 @@ import {
     Global,
     Module,
     ModuleMetadata,
-    ApplicationContext
+    ApplicationContext,
+    InjectionToken,
+    ProviderType
 } from "@wocker/core";
 
 
 export class TestingModuleBuilder {
     protected readonly moduleType: any;
+    protected readonly overrideProviders: Map<InjectionToken, ProviderType>;
 
     public constructor(metadata: ModuleMetadata) {
         this.moduleType = this.createModule(metadata);
+        this.overrideProviders = new Map();
     }
 
     protected createModule(metadata: ModuleMetadata) {
@@ -22,8 +26,40 @@ export class TestingModuleBuilder {
         return TestingModule;
     }
 
+    public overrideProvider(token: InjectionToken) {
+        const _this: TestingModuleBuilder = this;
+
+        return {
+            useProvider(type: ProviderType) {
+                _this.overrideProviders.set(token, type);
+
+                return _this;
+            },
+            useValue(value: any) {
+                _this.overrideProviders.set(token, {
+                    provide: token,
+                    useValue: value
+                });
+
+                return _this;
+            }
+        };
+    }
+
     public async build(): Promise<ApplicationContext> {
-        const scanner = new Scanner();
+        const _this = this;
+
+        class TestScanner extends Scanner {
+            protected scanRoutes(): void {
+                _this.overrideProviders.forEach((provider, token): void => {
+                    this.container.replace(token, provider);
+                });
+
+                super.scanRoutes();
+            }
+        }
+
+        const scanner = new TestScanner();
 
         await scanner.scan(this.moduleType);
 

@@ -91,11 +91,10 @@ describe("ModemMock", () => {
     it("should pull image", async (): Promise<void> => {
         const image = dockerMock.getImage("node:23");
 
-        expect(await image.inspect()).toBeNull();
+        await expect(image.inspect()).rejects.toThrowError();
 
         const stream = await dockerMock.pull("node:23");
 
-        Logger.info("Pulling...");
         await followStream(stream, false);
 
         const inspectInfo = await image.inspect();
@@ -117,7 +116,7 @@ describe("ModemMock", () => {
               tag = "latest",
               image = docker.getImage(`${name}:${tag}`);
 
-        expect(await image.inspect()).toBeNull();
+        await expect(image.inspect()).rejects.toThrowError();
 
         const stream = await docker.buildImage({
             context: fs.path(`projects/${name}`),
@@ -139,8 +138,6 @@ describe("ModemMock", () => {
     });
 
     it("should retrieve list of images", async (): Promise<void> => {
-        // Logger.unmute();
-
         const {docker} = getContext("v1");
 
         expect(await docker.listImages()).toEqual([]);
@@ -149,15 +146,11 @@ describe("ModemMock", () => {
 
         const images = await docker.listImages();
 
-        Logger.info("images:", images);
-
         expect(images.length).toBe(1);
         expect(images[0].RepoTags).toEqual(["node:23"]);
     });
 
     it("should be error", async (): Promise<void> => {
-        // Logger.unmute();
-
         const {docker} = getContext("v1");
 
         await expect(docker.pull("not:found")).rejects.toThrow();

@@ -6,4 +6,5 @@ export type Container = {
         Status: string;
         Running: boolean;
     };
+    Created: number;
 };

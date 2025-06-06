@@ -3,7 +3,6 @@ import {Logger} from "@kearisp/cli";
 import {Fixtures} from "./Fixtures";
 import {Router, Request, Response} from "../router";
 import {HttpMethod} from "../types/HttpMethod";
-import {version} from "ts-jest/dist/transformers/hoist-jest";
 
 
 type Options = ConstructorOptions & {
@@ -20,11 +19,19 @@ export class ModemRecorder extends Modem {
         this.router = new Router();
         this.fixtures = recordFixtures;
 
-        this.router.get(["/images/:tag/json", "/:version/images/:tag/json"], (req: Request, res: Response): void => {
-            if(!recordFixtures) {
-                return;
+        this.router.get(["/containers/json", "/:version/containers/json"], (req: Request, res: Response): void => {
+            const {
+                body: result
+            } = req;
+
+            if(this.fixtures) {
+                this.fixtures.recordJSON(result);
             }
 
+            res.send(null);
+        });
+
+        this.router.get(["/images/:tag/json", "/:version/images/:tag/json"], (req: Request, res: Response): void => {
             const {
                 params: {
                     version = "v1",
@@ -35,16 +42,14 @@ export class ModemRecorder extends Modem {
 
             const [, image, tag] = /^([^:]+):(.*)$/.exec(fullName);
 
-            this.fixtures.saveImage(version, image, tag, result);
+            if(this.fixtures) {
+                this.fixtures.saveImage(version, image, tag, result);
+            }
 
             res.send(null);
         });
 
         this.router.post(["/images/create", "/:version/images/create"], async (req: Request, res: Response): Promise<void> => {
-            if(!recordFixtures) {
-                return;
-            }
-
             const {
                 params: {
                     version = "v1"
@@ -56,11 +61,9 @@ export class ModemRecorder extends Modem {
                 body: stream
             } = req;
 
-            if(!stream) {
-                return;
+            if(this.fixtures && stream) {
+                await this.fixtures.recordPullStream(version, fromImage, tag, stream);
             }
-
-            await this.fixtures.recordPullStream(version, fromImage, tag, stream);
 
             res.send(null);
         });
@@ -77,22 +80,20 @@ export class ModemRecorder extends Modem {
                 body: stream
             } = req;
 
-            if(!stream) {
-                res.send(null);
-                return;
+            if(this.fixtures && stream) {
+                const [image, tag] = fullName.split(":");
+
+                Logger.info("Building...", version, buildVersion, image, tag);
+
+                await this.fixtures.recordBuildStream(version, buildVersion, image, tag, stream);
             }
-
-            const [, image, tag] = /^([^:]+):(.*)$/.exec(fullName);
-
-            Logger.info("Building...", version, buildVersion, image, tag);
-            await this.fixtures.recordBuildStream(version, buildVersion, image, tag, stream);
 
             res.send(null);
         });
     }
 
     public dial(options: DialOptions, callback?: RequestCallback): void {
-        super.dial(options, (err, result) => {
+        super.dial(options, (err, result): void => {
             const {
                 path,
                 method,
@@ -100,9 +101,16 @@ export class ModemRecorder extends Modem {
             } = options;
 
             Logger.info("Recorder dial:", method, path);
+            // console.log("Recorder dial:", method, path);
             this.router.exec(method as HttpMethod, path, result, body).catch(() => undefined);
 
             callback(err, result);
         });
+    }
+
+    public setFixtures(fixtures: Fixtures): this {
+        this.fixtures = fixtures;
+
+        return this;
     }
 }

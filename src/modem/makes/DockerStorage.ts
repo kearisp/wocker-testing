@@ -38,6 +38,10 @@ export class DockerStorage {
         this.router.get(["/containers/:id/json", "/:version/containers/:id/json"], (req: Request, res: Response): void => {
             const inspect = this.containerInspect(req.params.id);
 
+            if(!inspect) {
+                throw new Error("Not found");
+            }
+
             res.status(200).send(inspect);
         });
 
@@ -52,7 +56,13 @@ export class DockerStorage {
         });
 
         this.router.get(["/images/:tag/json", "/:version/images/:tag/json"], (req: Request, res: Response): void => {
-            res.status(200).send(this.imageInspect(req.params.tag));
+            const inspect = this.imageInspect(req.params.tag);
+
+            if(!inspect) {
+                throw new Error("Image not found");
+            }
+
+            res.status(200).send(inspect);
         });
 
         this.router.delete(["/images/:tag", "/:version/images/:tag"], (req: Request, res: Response): void => {
@@ -66,7 +76,7 @@ export class DockerStorage {
                 },
                 body: {
                     fromImage,
-                    tag,
+                    tag
                 }
             } = req;
 
@@ -76,7 +86,7 @@ export class DockerStorage {
                 res.status(200).send(stream);
             }
             else {
-                throw new Error("Not found");
+                throw new Error(`Not image "${fromImage}:${tag}" found`);
             }
         });
 
@@ -93,9 +103,39 @@ export class DockerStorage {
     }
 
     public listContainers(body: any): any[] {
-        Logger.info("list containers body", body);
+        const {
+            all,
+            filters: {
+                name
+            } = {}
+        } = body;
 
-        return [];
+        // Logger.info("list containers body", body);
+        // console.log("list containers body", body);
+        // console.log(this.containers);
+
+        return this.containers.filter((container) => {
+            if(all) {
+                return true;
+            }
+
+            if(name && container.Name === `/${name}`) {
+
+            }
+
+            return container.State.Running;
+        }).map((container) => {
+            return {
+                Id: container.Id,
+                Names: [container.Name],
+                Image: container.Image,
+                ImageID: "",
+                Created: container.Created,
+                State: container.State.Status,
+                Status: "Up 1 seconds",
+                Ports: []
+            };
+        });
     }
 
     public createContainer(info: any): string {
@@ -108,7 +148,8 @@ export class DockerStorage {
                 Dead: false,
                 Status: "created",
                 Error: ""
-            }
+            },
+            Created: new Date().getTime() / 1000,
         };
 
         this.containers.push(container);

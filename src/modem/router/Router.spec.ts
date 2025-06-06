@@ -3,7 +3,6 @@ import {Router, RouteHandler} from "./Router";
 import {Request} from "./Request";
 import {Response} from "./Response";
 import {HttpMethod} from "../types/HttpMethod";
-import {Logger} from "@kearisp/cli";
 
 
 describe("Router", (): void => {

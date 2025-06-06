@@ -11,8 +11,6 @@ export class Fixtures {
     public imageInspect(version: string, image: string, tag: string): any {
         const path = `records/${version}/image/${image}/${tag}.json`;
 
-        Logger.info(">>>", path);
-
         if(!this.fs.exists(path)) {
             return null;
         }
@@ -57,14 +55,9 @@ export class Fixtures {
             });
         }
 
-        try {
-            const target = this.fs.createWriteStream(`${dir}/${tag}.jsonl`);
+        const target = this.fs.createWriteStream(`${dir}/${tag}.jsonl`);
 
-            await this.recordStream(stream, target);
-        }
-        catch(err) {
-            Logger.error(err.message);
-        }
+        await this.recordStream(stream, target);
     }
 
     public async recordBuildStream(version: string, builderVersion: string, image: string, tag: string, stream: NodeJS.ReadableStream): Promise<void> {
@@ -83,12 +76,25 @@ export class Fixtures {
         await this.recordStream(stream, target);
     }
 
+    public recordJSON(data: any) {
+        const dir = "records";
+
+        if(!this.fs.exists(dir)) {
+            this.fs.mkdir(dir, {
+                recursive: true
+            });
+        }
+
+        this.fs.writeJSON(`${dir}/file.json`, data);
+        // this.fs.path("records")
+    }
+
     public async recordStream(stream: NodeJS.ReadableStream, target: NodeJS.WritableStream): Promise<void> {
         await new Promise<void>((resolve, reject) => {
             const cleanup = () => {
-                stream.off("data", handleData);
-                stream.off("end", handleEnd);
-                stream.off("error", handleError);
+                // stream.off("data", handleData);
+                // stream.off("end", handleEnd);
+                // stream.off("error", handleError);
             };
 
             const resolveCleanup = (): void => {
@@ -125,6 +131,9 @@ export class Fixtures {
             stream.on("data", handleData);
             stream.on("end", handleEnd);
             stream.on("error", handleError);
+
+            // target.once("finish", resolveCleanup);
+            // target.once("error", rejectCleanup);
         });
     }
 

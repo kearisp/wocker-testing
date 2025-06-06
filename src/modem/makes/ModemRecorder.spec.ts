@@ -1,34 +1,44 @@
 import {describe, it, beforeEach, afterEach, jest, expect} from "@jest/globals";
-import type Docker from "dockerode";
 import {FileSystem} from "@wocker/core";
+import type Docker from "dockerode";
 import {vol} from "memfs";
 import {ModemMock} from "./ModemMock";
 import {Fixtures} from "./Fixtures";
+import {Logger} from "@kearisp/cli";
 
 
 describe("ModemRecorder", (): void => {
     const fs = new FileSystem(`${__dirname}/../../../fixtures`),
-          fixtures = Fixtures.fromFS(fs),
-          testFS = new FileSystem("/home/wocker-test");
+          testFS = new FileSystem("/home/wocker-test"),
+          testFixtures = Fixtures.fromFS(testFS);
 
-    const followStream = async (stream: NodeJS.ReadableStream): Promise<void> => {
+    const followStream = async (stream: NodeJS.ReadableStream, log?: boolean): Promise<void> => {
         await new Promise<void>((resolve, reject): void => {
-            stream.on("data", () => undefined);
+            stream.on("data", (chunk) => {
+                if(!log) {
+                    return;
+                }
+
+                Logger.info(chunk.toString());
+            });
             stream.on("end", resolve);
             stream.on("error", reject);
         });
     };
 
-    const getContext = (version: string) => {
+    const getContext = (version?: string, withFixtures?: boolean) => {
         const {ModemRecorder} = require("./ModemRecorder"),
               DockerOde = require("dockerode");
 
         const modem = new ModemRecorder({
-            mockFixtures: fixtures,
-            recordFixtures: Fixtures.fromFS(testFS),
+            mockFixtures: Fixtures.fromFS(fs),
             socketPath: "/var/run/docker.sock",
             version: version === "v1" ? undefined : version
         });
+
+        if(withFixtures) {
+            modem.setFixtures(testFixtures);
+        }
 
         const docker: Docker = new DockerOde({
             // @ts-ignore
@@ -60,9 +70,12 @@ describe("ModemRecorder", (): void => {
 
     it.each([
         {version: "v1"},
+        {version: "v1"},
         {version: "v1.48"}
     ])("should record pull", async ({version}): Promise<void> => {
-        const {docker} = getContext(version);
+        const {
+            docker
+        } = getContext(version, true);
 
         const name = "node",
               tag = "23",
@@ -82,8 +95,8 @@ describe("ModemRecorder", (): void => {
 
     it.each([
         {
-            version: "v1",
-            buildVersion: "1"
+            version: undefined,
+            buildVersion: undefined
         },
         {
             version: "v1.48",
@@ -94,7 +107,7 @@ describe("ModemRecorder", (): void => {
             buildVersion: "2"
         }
     ])("should record build ($buildVersion) $version", async ({version, buildVersion}): Promise<void> => {
-        const {docker} = getContext(version);
+        const {docker} = getContext(version, true);
 
         const name = "test-project",
               tag = "latest",
@@ -115,11 +128,11 @@ describe("ModemRecorder", (): void => {
 
         await followStream(stream);
 
-        expect(testFS.exists(`records/${version}/build-${buildVersion}/${name}/${tag}.jsonl`)).toBeTruthy();
+        expect(testFS.exists(`records/${version || "v1"}/build-${buildVersion || "1"}/${name}/${tag}.jsonl`)).toBeTruthy();
 
         const info = await image.inspect();
 
         expect(info).not.toBeNull();
-        expect(testFS.exists(`records/${version}/image/${name}/${tag}.json`)).toBeTruthy();
+        expect(testFS.exists(`records/${version || "v1"}/image/${name}/${tag}.json`)).toBeTruthy();
     });
 });
