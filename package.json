@@ -29,11 +29,15 @@
         "make-coverage-badge": "make-coverage-badge"
     },
     "peerDependencies": {
-        "@wocker/core": "^1.0.23"
+        "@wocker/core": "^1.0.23",
+        "docker-modem": "^5.0.6",
+        "dockerode": "^4.0.7"
     },
     "devDependencies": {
         "@types/jest": "^29.5.14",
         "@wocker/core": "^1.0.23",
+        "docker-modem": "*",
+        "dockerode": "*",
         "jest": "^29.7.0",
         "make-coverage-badge": "^1.2.0",
         "memfs": "^4.17.2",
