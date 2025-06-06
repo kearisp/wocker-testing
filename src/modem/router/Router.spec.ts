@@ -57,8 +57,6 @@ describe("Router", (): void => {
             }
         }
     ])("should exec $method $pattern", async ({method, pattern, path, response}): Promise<void> => {
-        Logger.unmute();
-
         const router = new Router();
 
         const handler: RouteHandler = jest.fn((req: Request, res: Response): void => {
