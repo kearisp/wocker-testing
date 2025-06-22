@@ -1,11 +1,9 @@
-import {Module, ModuleConfig, Factory} from "@wocker/core";
+import {ModuleMetadata} from "@wocker/core";
+import {TestingModuleBuilder} from "./TestingModuleBuilder";
 
 
 export class Test {
-    public static async createTestingModule(config: ModuleConfig) {
-        @Module(config)
-        class TestModule {}
-
-        return Factory.create(TestModule);
+    public static createTestingModule(metadata: ModuleMetadata): TestingModuleBuilder {
+        return new TestingModuleBuilder(metadata);
     }
 }
