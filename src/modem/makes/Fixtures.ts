@@ -1,6 +1,5 @@
 import {FileSystem} from "@wocker/core";
 import {Readable} from "stream";
-import {Logger} from "@kearisp/cli";
 
 
 export class Fixtures {
@@ -138,11 +137,11 @@ export class Fixtures {
     }
 
     public static fromFS(fs: FileSystem): Fixtures {
-        return new Fixtures(fs);
+        return new this(fs);
     }
 
     public static fromPath(path: string): Fixtures {
-        return Fixtures.fromFS(
+        return this.fromFS(
             new FileSystem(path)
         );
     }

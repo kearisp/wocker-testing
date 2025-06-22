@@ -1,4 +1,4 @@
-import {describe, it, expect, beforeEach} from "@jest/globals";
+import {describe, it, expect} from "@jest/globals";
 import {FileSystem} from "@wocker/core";
 import {Logger} from "@kearisp/cli";
 import Docker from "dockerode";
@@ -44,56 +44,14 @@ describe("ModemMock", () => {
         });
     };
 
-    const modemMock = new ModemMock({});
-    const dockerMock = new Docker({
-        // @ts-ignore
-        modem: modemMock
-    });
-
-    beforeEach((): void => {
-        modemMock.reset();
-        modemMock.registerFixtures(fixtures);
-    });
-
-    it("should get empty containers list", async (): Promise<void> => {
-        const containers = await dockerMock.listContainers({
-            all: true
-        });
-
-        expect(containers).toEqual([]);
-    });
-
-    it("should create container", async (): Promise<void> => {
-        const container = await dockerMock.createContainer({
-            name: "test.workspace",
-            Image: "oven/bun:latest"
-        });
-
-        const inspectInfo = await container.inspect();
-
-        expect(inspectInfo.Id).toBe(container.id);
-        expect(inspectInfo.State.Running).toBeFalsy();
-        expect(inspectInfo.State.Dead).toBeFalsy();
-        expect(inspectInfo.State.Status).toBe("created");
-        expect(inspectInfo.State.Error).toBe("");
-
-        await container.start();
-
-        const inspectInfo2 = await container.inspect();
-
-        expect(inspectInfo2.Id).toBe(container.id);
-        expect(inspectInfo2.State.Running).toBeTruthy();
-        expect(inspectInfo2.State.Dead).toBeFalsy();
-        expect(inspectInfo2.State.Status).toBe("running");
-        expect(inspectInfo2.State.Error).toBe("");
-    });
-
     it("should pull image", async (): Promise<void> => {
-        const image = dockerMock.getImage("node:23");
+        const {docker} = getContext("v1");
+
+        const image = docker.getImage("node:23");
 
         await expect(image.inspect()).rejects.toThrowError();
 
-        const stream = await dockerMock.pull("node:23");
+        const stream = await docker.pull("node:23");
 
         await followStream(stream, false);
 
@@ -103,7 +61,7 @@ describe("ModemMock", () => {
 
         await image.remove();
 
-        const images = await dockerMock.listImages();
+        const images = await docker.listImages();
 
         expect(images).toEqual([]);
     });
@@ -140,7 +98,7 @@ describe("ModemMock", () => {
     it("should retrieve list of images", async (): Promise<void> => {
         const {docker} = getContext("v1");
 
-        expect(await docker.listImages()).toEqual([]);
+        expect(await docker.listImages({all: true})).toEqual([]);
 
         await followStream(await docker.pull("node:23"));
 
@@ -150,9 +108,54 @@ describe("ModemMock", () => {
         expect(images[0].RepoTags).toEqual(["node:23"]);
     });
 
-    it("should be error", async (): Promise<void> => {
+    it("should throw error when inspecting non-existent image", async (): Promise<void> => {
         const {docker} = getContext("v1");
 
         await expect(docker.pull("not:found")).rejects.toThrow();
+    });
+
+    it("should throw error when inspecting non-existent container", async (): Promise<void> => {
+        const {docker} = getContext("v1");
+
+        await expect(docker.getContainer("not-exists").inspect()).rejects.toThrowError();
+    });
+
+    it("should get empty containers list", async (): Promise<void> => {
+        const {docker} = getContext("v1");
+
+        const containers = await docker.listContainers({
+            all: true
+        });
+
+        expect(containers).toEqual([]);
+    });
+
+    it("should create container", async (): Promise<void> => {
+        const {docker} = getContext("v1");
+
+        const container = await docker.createContainer({
+            name: "test.workspace",
+            Image: "oven/bun:latest"
+        });
+
+        const inspectInfo = await container.inspect();
+
+        expect(inspectInfo.Id).toBe(container.id);
+        expect(inspectInfo.State.Running).toBeFalsy();
+        expect(inspectInfo.State.Dead).toBeFalsy();
+        expect(inspectInfo.State.Status).toBe("created");
+        expect(inspectInfo.State.Error).toBe("");
+
+        await container.start();
+
+        const inspectInfo2 = await container.inspect();
+
+        expect(inspectInfo2.Id).toBe(container.id);
+        expect(inspectInfo2.State.Running).toBeTruthy();
+        expect(inspectInfo2.State.Dead).toBeFalsy();
+        expect(inspectInfo2.State.Status).toBe("running");
+        expect(inspectInfo2.State.Error).toBe("");
+
+        // const containers = await docker.listContainers();
     });
 });

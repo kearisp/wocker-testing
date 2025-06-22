@@ -110,10 +110,6 @@ export class DockerStorage {
             } = {}
         } = body;
 
-        // Logger.info("list containers body", body);
-        // console.log("list containers body", body);
-        // console.log(this.containers);
-
         return this.containers.filter((container) => {
             if(all) {
                 return true;

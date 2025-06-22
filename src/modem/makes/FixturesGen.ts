@@ -1,5 +1,5 @@
-import {Fixtures} from "./Fixtures";
 import {Readable} from "stream";
+import {Fixtures} from "./Fixtures";
 
 
 export class FixturesGen extends Fixtures {
