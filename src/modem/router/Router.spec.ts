@@ -68,7 +68,7 @@ describe("Router", (): void => {
 
         const res = await router.exec(method, path, {});
 
-        expect(handler).toBeCalled();
+        expect(handler).toHaveBeenCalled();
         expect(res).toEqual(response);
     });
 });
