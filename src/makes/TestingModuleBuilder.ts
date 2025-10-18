@@ -2,20 +2,26 @@ import {
     Scanner,
     Global,
     Module,
-    ModuleMetadata,
     ApplicationContext,
     InjectionToken,
-    ProviderType
+    ProviderType,
+    ProcessService,
+    Type,
+    ModuleMetadata
 } from "@wocker/core";
+import {MockProcessService} from "../services";
 
 
 export class TestingModuleBuilder {
-    protected readonly moduleType: any;
+    protected readonly moduleType: Type;
     protected readonly overrideProviders: Map<InjectionToken, ProviderType>;
 
     public constructor(metadata: ModuleMetadata) {
         this.moduleType = this.createModule(metadata);
         this.overrideProviders = new Map();
+
+        this.overrideProvider(ProcessService)
+            .useProvider(MockProcessService);
     }
 
     protected createModule(metadata: ModuleMetadata) {
