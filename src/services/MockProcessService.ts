@@ -2,19 +2,22 @@ import {
     Injectable,
     Inject,
     ProcessService,
-    WOCKER_DATA_DIR_KEY
+    FileSystemDriver,
+    WOCKER_DATA_DIR_KEY,
+    FILE_SYSTEM_DRIVER_KEY
 } from "@wocker/core";
-import FS from "fs";
 import Path from "path";
 
 
-@Injectable()
+@Injectable("CORE_PROCESS_SERVICE")
 export class MockProcessService extends ProcessService {
     protected _pwd: string;
 
     public constructor(
         @Inject(WOCKER_DATA_DIR_KEY)
-        dataDir: string
+        dataDir: string,
+        @Inject(FILE_SYSTEM_DRIVER_KEY)
+        protected readonly driver: FileSystemDriver
     ) {
         super();
 
@@ -26,7 +29,7 @@ export class MockProcessService extends ProcessService {
     }
 
     public chdir(path: string): void {
-        if(!FS.existsSync(path)) {
+        if(!this.driver.existsSync(path)) {
             throw new Error(`ENOENT: no such file or directory, chdir '${this._pwd}' -> '${path}'`);
         }
 

@@ -4,6 +4,16 @@ description: 'Sets up package version with beta tag and auto-incremented index'
 runs:
     using: 'composite'
     steps:
+      - name: Setup core version
+        shell: bash
+        run: |
+            CORE_VERSION=$(npm pkg get peerDependencies.@wocker/core | sed -e 's/^"//' -e 's/"$//')
+            CORE_BETA_VERSION=$(npm view @wocker/core@beta version 2> /dev/null || echo "")
+            if [[ "$CORE_BETA_VERSION" == "$CORE_VERSION"* ]]; then
+                npm pkg set "peerDependencies.@wocker/core=^$CORE_BETA_VERSION"
+                npm pkg set "devDependencies.@wocker/core=^$CORE_BETA_VERSION"
+            fi
+
       - name: Setup version
         shell: bash
         run: |

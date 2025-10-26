@@ -49,7 +49,7 @@ describe("ModemMock", () => {
 
         const image = docker.getImage("node:23");
 
-        await expect(image.inspect()).rejects.toThrowError();
+        await expect(image.inspect()).rejects.toThrow();
 
         const stream = await docker.pull("node:23");
 
@@ -74,7 +74,7 @@ describe("ModemMock", () => {
               tag = "latest",
               image = docker.getImage(`${name}:${tag}`);
 
-        await expect(image.inspect()).rejects.toThrowError();
+        await expect(image.inspect()).rejects.toThrow();
 
         const stream = await docker.buildImage({
             context: fs.path(`projects/${name}`),
@@ -117,7 +117,7 @@ describe("ModemMock", () => {
     it("should throw error when inspecting non-existent container", async (): Promise<void> => {
         const {docker} = getContext("v1");
 
-        await expect(docker.getContainer("not-exists").inspect()).rejects.toThrowError();
+        await expect(docker.getContainer("not-exists").inspect()).rejects.toThrow();
     });
 
     it("should get empty containers list", async (): Promise<void> => {

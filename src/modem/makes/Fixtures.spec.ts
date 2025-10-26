@@ -70,8 +70,8 @@ describe("Fixtures", (): void => {
 
         await testFixtures.recordStream(stream, target);
 
-        expect(stream.pause).toBeCalled();
-        expect(stream.resume).toBeCalled();
+        expect(stream.pause).toHaveBeenCalled();
+        expect(stream.resume).toHaveBeenCalled();
         expect(target.once).toHaveBeenCalledWith("drain", expect.any(Function));
     });
 });
