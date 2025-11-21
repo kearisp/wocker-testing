@@ -5,6 +5,7 @@ import {
     ApplicationContext,
     InjectionToken,
     ProviderType,
+    DynamicModule,
     ProcessService,
     Type,
     ModuleMetadata
@@ -15,10 +16,12 @@ import {MockProcessService} from "../services";
 export class TestingModuleBuilder {
     protected readonly moduleType: Type;
     protected readonly overrideProviders: Map<InjectionToken, ProviderType>;
+    protected readonly overrideModules: Map<Type, Type | DynamicModule>;
 
     public constructor(metadata: ModuleMetadata) {
         this.moduleType = this.createModule(metadata);
         this.overrideProviders = new Map();
+        this.overrideModules = new Map();
 
         this.overrideProvider(ProcessService)
             .useProvider(MockProcessService);
@@ -52,10 +55,34 @@ export class TestingModuleBuilder {
         };
     }
 
+    public overrideModule(module: Type) {
+        const _this: TestingModuleBuilder = this;
+
+        return {
+            useModule: (newModule: Type | DynamicModule) => {
+                this.overrideModules.set(module, newModule);
+
+                return _this;
+            }
+        };
+    }
+
     public async build(): Promise<ApplicationContext> {
         const _this = this;
 
         class TestScanner extends Scanner {
+            protected scanModule(moduleDefinition: Type | DynamicModule) {
+                const type = this.isDynamicModule(moduleDefinition)
+                    ? moduleDefinition.module
+                    : moduleDefinition;
+
+                if(_this.overrideModules.has(type)) {
+                    return super.scanModule(_this.overrideModules.get(type));
+                }
+
+                return super.scanModule(moduleDefinition);
+            }
+
             protected scanRoutes(): void {
                 _this.overrideProviders.forEach((provider, token): void => {
                     this.container.replace(token, provider);

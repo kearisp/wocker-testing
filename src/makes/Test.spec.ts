@@ -68,4 +68,109 @@ describe("Test", (): void => {
         expect(testProvider).toBeInstanceOf(OverrideTestProvider);
         expect(testValue).toBe(PROVIDE_VALUE);
     });
+
+    it("should override module", async (): Promise<void> => {
+        @Module({
+            providers: [
+                {
+                    provide: "TEST_PROVIDER",
+                    useValue: "Default"
+                }
+            ],
+            exports: [
+                "TEST_PROVIDER"
+            ]
+        })
+        class TestModule {}
+
+        @Module({
+            providers: [
+                {
+                    provide: "TEST_PROVIDER",
+                    useValue: "Overrided"
+                }
+            ],
+            exports: [
+                "TEST_PROVIDER"
+            ]
+        })
+        class OverrideTestModule {}
+
+        const context = await Test
+            .createTestingModule({
+                imports: [
+                    TestModule
+                ]
+            })
+            .overrideModule(TestModule).useModule(OverrideTestModule)
+            .build();
+
+        const testProvider = context.get("TEST_PROVIDER");
+
+        expect(testProvider).toBe("Overrided");
+    });
+
+    it("should override submodule", async (): Promise<void> => {
+        @Injectable("TEST_SUBMODULE_PROVIDER")
+        class TestSubModuleService {
+            public getValue(): string {
+                return "TestValue";
+            }
+        }
+
+        @Module({
+            providers: [TestSubModuleService],
+            exports: [TestSubModuleService]
+        })
+        class TestSubModule {}
+
+        @Injectable("TEST_MODULE_SERVICE")
+        class TestTopModuleService {
+            public constructor(
+                protected readonly testSubmoduleService: TestSubModuleService
+            ) {}
+
+            public getValue() {
+                return this.testSubmoduleService.getValue();
+            }
+        }
+
+        @Module({
+            imports: [TestSubModule],
+            providers: [TestTopModuleService],
+            exports: [TestTopModuleService]
+        })
+        class TestTopModule {}
+
+        @Injectable("TEST_SUBMODULE_PROVIDER")
+        class TestOverrideSubModuleService {
+            public getValue(): string {
+                return "Overrided";
+            }
+        }
+
+        @Module({
+            providers: [TestOverrideSubModuleService],
+            exports: [TestOverrideSubModuleService]
+        })
+        class TestOverrideSubmodule {}
+
+        const context = await Test
+            .createTestingModule({
+                imports: [
+                    TestSubModule,
+                    TestTopModule
+                ],
+                exports: [TestTopModuleService]
+            })
+            .overrideModule(TestSubModule).useModule(TestOverrideSubmodule)
+            .build();
+
+        const testTopModuleService = context.get(TestTopModuleService),
+              testSubmoduleService = context.get(TestSubModuleService);
+
+        expect(testTopModuleService).toBeInstanceOf(TestTopModuleService);
+        expect(testSubmoduleService).toBeInstanceOf(TestOverrideSubModuleService);
+        expect(testTopModuleService.getValue()).toBe("Overrided");
+    });
 });
