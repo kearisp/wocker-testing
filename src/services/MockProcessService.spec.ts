@@ -1,6 +1,6 @@
 import {describe, it, expect, beforeEach} from "@jest/globals";
 import {vol} from "memfs";
-import {ApplicationContext, ProcessService, WOCKER_DATA_DIR_KEY} from "@wocker/core";
+import {ApplicationContext, ProcessService, WOCKER_DATA_DIR_KEY, FILE_SYSTEM_DRIVER_KEY} from "@wocker/core";
 import {Test} from "../makes";
 import {MockProcessService} from "./";
 
@@ -13,15 +13,9 @@ describe("MockProcessService", (): void => {
         vol.reset();
 
         context = await Test
-            .createTestingModule({
-                providers: [
-                    {
-                        provide: WOCKER_DATA_DIR_KEY,
-                        useValue: HOME_DIR
-                    },
-                    ProcessService
-                ]
-            })
+            .createTestingModule({})
+            .overrideProvider(FILE_SYSTEM_DRIVER_KEY).useValue(vol)
+            .overrideProvider(WOCKER_DATA_DIR_KEY).useValue(HOME_DIR)
             .overrideProvider(ProcessService).useProvider(MockProcessService)
             .build();
     });
