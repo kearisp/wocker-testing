@@ -1,7 +1,7 @@
 {
     "name": "@wocker/testing",
     "type": "commonjs",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "author": "Kris Papercut <krispcut@gmail.com>",
     "description": "Docker workspace for web projects (testing)",
     "license": "MIT",
@@ -44,7 +44,6 @@
         "memfs": "^4.17.2",
         "ts-jest": "^29.4.4",
         "ts-node": "^10.9.2",
-        "typescript": "^5.9.2",
-        "unionfs": "^4.5.4"
+        "typescript": "^5.9.2"
     }
 }
