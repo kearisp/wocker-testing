@@ -1,7 +1,7 @@
 {
     "name": "@wocker/testing",
     "type": "commonjs",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "author": "Kris Papercut <krispcut@gmail.com>",
     "description": "Docker workspace for web projects (testing)",
     "license": "MIT",
@@ -36,7 +36,7 @@
     },
     "devDependencies": {
         "@types/jest": "^30.0.0",
-        "@wocker/core": "^1.0.26",
+        "@wocker/core": "^1.0.28",
         "docker-modem": "*",
         "dockerode": "*",
         "jest": "^30.1.3",
