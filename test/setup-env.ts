@@ -1,13 +1,13 @@
 import {beforeEach, afterEach, expect} from "@jest/globals";
 
 
-beforeEach((): void => {
+beforeEach(() => {
     const {Logger} = require("@kearisp/cli");
 
     Logger.mute();
 });
 
-afterEach((): void => {
+afterEach(() => {
     const {Logger} = require("@kearisp/cli");
 
     const {

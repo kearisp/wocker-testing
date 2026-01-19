@@ -3,7 +3,7 @@ import {vol} from "memfs";
 
 const reset = vol.reset.bind(vol);
 
-vol.reset = (): void => {
+vol.reset = () => {
     reset();
 
     vol.mkdirSync("/home/wocker-test", {
