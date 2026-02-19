@@ -1,1 +1,1 @@
-export * from "./MockProcessService";
+export * from "./ProcessMockService";

@@ -6,14 +6,17 @@ import {
     WOCKER_DATA_DIR_KEY,
     FILE_SYSTEM_DRIVER_KEY
 } from "@wocker/core";
-import {Duplex} from "stream";
 import Path from "path";
+import {MockReadStream} from "../makes/MockReadStream";
+import {MockWriteStream} from "../makes/MockWriteStream";
 
 
 @Injectable("CORE_PROCESS_SERVICE")
-export class MockProcessService extends ProcessService {
+export class ProcessMockService extends ProcessService {
     protected _pwd: string;
-    protected stdout: Duplex;
+    protected _stdin: MockReadStream;
+    protected _stdout: MockWriteStream;
+    protected _stderr: MockWriteStream;
 
     public constructor(
         @Inject(WOCKER_DATA_DIR_KEY)
@@ -24,7 +27,21 @@ export class MockProcessService extends ProcessService {
         super();
 
         this._pwd = dataDir;
-        this.stdout = new Duplex();
+        this._stdin = new MockReadStream();
+        this._stdout = new MockWriteStream();
+        this._stderr = new MockWriteStream();
+    }
+
+    public get stdin() {
+        return this._stdin;
+    }
+
+    public get stdout() {
+        return this._stdout;
+    }
+
+    public get stderr() {
+        return this._stderr;
     }
 
     public pwd(path: string = ""): string {

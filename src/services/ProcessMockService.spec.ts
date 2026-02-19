@@ -2,10 +2,10 @@ import {describe, it, expect, beforeEach} from "@jest/globals";
 import {vol} from "memfs";
 import {ApplicationContext, ProcessService, WOCKER_DATA_DIR_KEY, FILE_SYSTEM_DRIVER_KEY} from "@wocker/core";
 import {Test} from "../makes";
-import {MockProcessService} from "./";
+import {ProcessMockService} from "./";
 
 
-describe("MockProcessService", () => {
+describe("ProcessMockService", () => {
     const HOME_DIR = "/home/wocker-test";
     let context: ApplicationContext;
 
@@ -22,11 +22,11 @@ describe("MockProcessService", () => {
             .build();
     });
 
-    it("should return MockProcessService when requesting ProcessService from context", () => {
+    it("should return ProcessMockService when requesting ProcessService from context", () => {
         const processService = context.get(ProcessService),
-              mockProcessService = context.get(MockProcessService);
+              processMockService = context.get(ProcessMockService);
 
-        expect(processService).toBe(mockProcessService);
+        expect(processService).toBe(processMockService);
     });
 
     it("should return current working directory", () => {
@@ -36,7 +36,7 @@ describe("MockProcessService", () => {
     });
 
     it("should change current working directory", () => {
-        const processService = context.get(MockProcessService);
+        const processService = context.get(ProcessMockService);
 
         expect(processService.pwd()).toBe(HOME_DIR);
         expect(processService.pwd("foo")).toBe(`${HOME_DIR}/foo`);
@@ -47,7 +47,7 @@ describe("MockProcessService", () => {
     });
 
     it("should throw error when changing to non-existent directory", () => {
-        const processService = context.get(MockProcessService),
+        const processService = context.get(ProcessMockService),
               nonExistentDir = "/non/existent/dir";
 
         expect(() => processService.chdir(nonExistentDir))

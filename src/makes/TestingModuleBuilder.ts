@@ -10,7 +10,7 @@ import {
     Type,
     ModuleMetadata
 } from "@wocker/core";
-import {MockProcessService} from "../services";
+import {ProcessMockService} from "../services";
 
 
 export class TestingModuleBuilder {
@@ -24,7 +24,7 @@ export class TestingModuleBuilder {
         this.overrideModules = new Map();
 
         this.overrideProvider(ProcessService)
-            .useProvider(MockProcessService);
+            .useProvider(ProcessMockService);
     }
 
     protected createModule(metadata: ModuleMetadata) {
