@@ -21,27 +21,27 @@ jobs:
             id-token: write
         steps:
           - name: Checkout code
-            uses: actions/checkout@v4
+            uses: actions/checkout@v6
 
           - name: Setup Node.js
-            uses: actions/setup-node@v4
+            uses: actions/setup-node@v6
             with:
-                node-version: 22
+                node-version: 25
                 registry-url: 'https://registry.npmjs.org'
 
           - name: Setup beta version
-            uses: kearisp/npm-version-action@v0.0.2
+            uses: kearisp/npm-version-action@v0.0.3
             with:
                 tag: beta
 
           - name: Setup @wocker/core beta version
-            uses: kearisp/npm-setup-deps-action@v0.0.7
+            uses: kearisp/npm-setup-deps-action@v0.0.8
             with:
                 package: "@wocker/core"
                 tag: "beta"
 
           - name: Cache dependencies
-            uses: actions/cache@v4
+            uses: actions/cache@v5
             with:
                 path: ~/.npm
                 key: ${{ runner.os }}-npm-${{ hashFiles('**/package.json') }}
