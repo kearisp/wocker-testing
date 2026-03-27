@@ -14,6 +14,8 @@ import {MockWriteStream} from "../makes/MockWriteStream";
 @Injectable("CORE_PROCESS_SERVICE")
 export class ProcessMockService extends ProcessService {
     protected _pwd: string;
+    protected _uid: string | undefined = "1000";
+    protected _gid: string | undefined = "1000";
     protected _stdin: MockReadStream;
     protected _stdout: MockWriteStream;
     protected _stderr: MockWriteStream;
@@ -30,6 +32,14 @@ export class ProcessMockService extends ProcessService {
         this._stdin = new MockReadStream();
         this._stdout = new MockWriteStream();
         this._stderr = new MockWriteStream();
+    }
+
+    public get UID(): string | undefined {
+        return this._uid;
+    }
+
+    public get GID(): string | undefined {
+        return this._gid;
     }
 
     public get stdin() {
