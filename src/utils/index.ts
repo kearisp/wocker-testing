@@ -1,1 +1,5 @@
-export * from "./utilsMock";
+export * from "./promtsMock";
+export {
+    /** @deprecated */
+    promptsMock as utilsMock
+} from "./promtsMock";
