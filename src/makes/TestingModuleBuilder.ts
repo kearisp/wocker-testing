@@ -44,6 +44,14 @@ export class TestingModuleBuilder {
 
                 return _this;
             },
+            useClass(useClass: Type) {
+                _this.overrideProviders.set(token, {
+                    provide: token,
+                    useClass: useClass
+                });
+
+                return _this;
+            },
             useValue(value: any) {
                 _this.overrideProviders.set(token, {
                     provide: token,
